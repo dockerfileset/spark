@@ -1,0 +1,43 @@
+version: '3'
+services:
+  master:
+    build: .
+    hostname: master
+    environment:
+      - MODE=MASTER
+    networks:
+      cluster_net:
+        ipv4_address: 192.168.100.2
+    extra_hosts:
+      - "datanode1:192.168.100.3"
+      - "datanode2:192.168.100.4"
+  datanode1:
+    build: .
+    hostname: datanode1
+    environment:
+      - MODE=CLUSTER
+    networks:
+      cluster_net:
+        ipv4_address: 192.168.100.3
+    extra_hosts:
+      - "master:192.168.100.2"
+      - "datanode2:192.168.100.4"
+  datanode2:
+    build: .
+    hostname: datanode2
+    environment:
+      - MODE=CLUSTER
+    networks:
+      cluster_net:
+        ipv4_address: 192.168.100.4
+    extra_hosts:
+      - "datanode1:192.168.100.3"
+      - "master:192.168.100.2"
+
+networks:
+  cluster_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.100.0/24
